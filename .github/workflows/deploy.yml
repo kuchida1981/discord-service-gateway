@@ -61,7 +61,7 @@ jobs:
             --region=${{ env.REGION }} \
             --platform=managed \
             --allow-unauthenticated \
-            --set-env-vars="MODE=prod" \
+            --set-env-vars="MODE=prod,DISCORD_PUBLIC_KEY=${{ secrets.DISCORD_PUBLIC_KEY }}" \
             --port=8000
 
       - name: Get service URL
