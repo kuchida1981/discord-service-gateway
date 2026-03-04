@@ -14,6 +14,11 @@ class Settings(BaseSettings):
     NGROK_AUTHTOKEN: str | None = None
     NGROK_DOMAIN: str | None = None
 
+    # Cloud Run Proxy Settings
+    MODE: str = "prod"  # prod, dev, local
+    FORWARD_URL: str | None = None  # ngrok URL for dev mode
+    PROXY_SECRET: str | None = None  # Optional secret for proxy authentication
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

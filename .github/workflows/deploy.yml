@@ -1,0 +1,74 @@
+name: Deploy to Cloud Run
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:  # 手動トリガーを有効化
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: false
+        default: 'dev'
+  push:  # テスト用: feature ブランチへのプッシュでもトリガー
+    branches:
+      - feature/setup-cloud-run-deployment-and-proxy-specs
+
+env:
+  REGION: ${{ secrets.GCP_REGION }}
+  SERVICE_NAME: ${{ secrets.GCP_SERVICE_NAME }}
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/discord-gateway/${{ env.SERVICE_NAME }}:${{ github.ref_name }} .
+          docker tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/discord-gateway/${{ env.SERVICE_NAME }}:${{ github.ref_name }} \
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/discord-gateway/${{ env.SERVICE_NAME }}:latest
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/discord-gateway/${{ env.SERVICE_NAME }}:${{ github.ref_name }}
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/discord-gateway/${{ env.SERVICE_NAME }}:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/discord-gateway/${{ env.SERVICE_NAME }}:${{ github.ref_name }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --set-env-vars="MODE=prod" \
+            --port=8000
+
+      - name: Get service URL
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --region=${{ env.REGION }} \
+            --format='value(status.url)')
+          echo "Service deployed to: $SERVICE_URL"
+          echo "SERVICE_URL=$SERVICE_URL" >> $GITHUB_OUTPUT
+        id: deploy-output

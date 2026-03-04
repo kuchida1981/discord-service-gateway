@@ -1,11 +1,17 @@
 """Discord interaction API routes."""
 
-from fastapi import APIRouter, Depends, Request
+import logging
+
+import httpx
+from fastapi import APIRouter, Depends, Header, Request
+from fastapi.responses import JSONResponse
 
 from src.api.deps import verify_discord_signature
+from src.core.config import settings
 from src.core.constants import InteractionResponseType, InteractionType
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/")
@@ -14,9 +20,56 @@ async def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@router.post("/interactions", dependencies=[Depends(verify_discord_signature)])
-async def interactions(request: Request) -> dict[str, object]:
-    """Handle Discord interactions."""
+@router.post("/interactions")
+async def interactions(
+    request: Request,
+    verified_body: bytes = Depends(verify_discord_signature),
+    x_signature_ed25519: str = Header(None),
+    x_signature_timestamp: str = Header(None),
+) -> dict[str, object] | JSONResponse:
+    """Handle Discord interactions.
+
+    In dev mode (MODE=dev), forwards requests to FORWARD_URL.
+    In prod/local modes, processes interactions normally.
+    """
+    # Forward to local environment in dev mode
+    if settings.MODE == "dev":
+        if not settings.FORWARD_URL:
+            logger.error("MODE=dev but FORWARD_URL is not set")
+            return {"error": "FORWARD_URL not configured"}
+
+        logger.info("MODE=dev: Forwarding request to %s", settings.FORWARD_URL)
+
+        # Prepare headers for forwarding
+        forward_headers = {
+            "Content-Type": request.headers.get("content-type", "application/json"),
+        }
+        if x_signature_ed25519:
+            forward_headers["X-Signature-Ed25519"] = x_signature_ed25519
+        if x_signature_timestamp:
+            forward_headers["X-Signature-Timestamp"] = x_signature_timestamp
+        if settings.PROXY_SECRET:
+            forward_headers["X-Proxy-Secret"] = settings.PROXY_SECRET
+
+        try:
+            async with httpx.AsyncClient(timeout=3.0) as client:
+                response = await client.post(
+                    f"{settings.FORWARD_URL}/interactions",
+                    content=verified_body,
+                    headers=forward_headers,
+                )
+                return JSONResponse(
+                    content=response.json(),
+                    status_code=response.status_code,
+                )
+        except httpx.TimeoutException:
+            logger.error("Timeout forwarding to %s", settings.FORWARD_URL)
+            return {"error": "Forwarding timeout"}
+        except Exception as e:
+            logger.error("Error forwarding request: %s", e)
+            return {"error": "Forwarding failed"}
+
+    # Normal processing in prod/local mode
     interaction = await request.json()
 
     if interaction.get("type") == InteractionType.PING:
