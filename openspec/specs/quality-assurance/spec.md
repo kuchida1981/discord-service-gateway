@@ -40,9 +40,14 @@ Mypyを使用して、型定義の不整合を検出しなければならない 
 - **WHEN** コードベース内で `print(` を検索する
 - **THEN** 実装コードおよびスクリプト内で `print` 関数の呼び出しが見つかってはならない
 
-### Requirement: Magic Value Elimination
-プロトコル定数（Interaction Type等）やステータスコードを直接数値で記述することを禁止し、`Enum` または定数を使用しなければならない (SHALL)。
+### Requirement: Draft Pull Request Control
+CI リソースを最適化し、開発初期段階の不要な失敗を避けるため、Draft 状態の PR では特定の品質チェックをスキップしなければならない (SHALL)。
+Ready for Review に切り替わった際に、自動的にすべてのチェックがトリガーされなければならない。
 
-#### Scenario: Use Enum for Interaction Types
-- **WHEN** `/interactions` エンドポイントの実装を確認する
-- **THEN** `type == 1` のようなマジックナンバーではなく、`InteractionType.PING` のような Enum が使用されていなければならない
+#### Scenario: Skip quality checks for Draft PR
+- **WHEN** PR のステータスが `draft` である
+- **THEN** `check-todo` 以外の品質チェック（Lint, Test, TypeCheck, OpenSpec）は実行されてはならない
+
+#### Scenario: Trigger all checks on Ready for Review
+- **WHEN** PR のステータスが `Ready for Review` に変更される
+- **THEN** スキップされていたすべての品質チェックが自動的にトリガーされなければならない
