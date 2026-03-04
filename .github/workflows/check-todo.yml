@@ -6,6 +6,7 @@ on:
 
 jobs:
   check-todo:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Check for unchecked TODOs in PR description

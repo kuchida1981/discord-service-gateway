@@ -13,10 +13,10 @@
 ## 3. 新規ワークフローの作成 (PR メタデータ)
 
 - [x] 3.1 `.github/workflows/check-pr-issue.yml` を新規作成し、`github-script` による Issue 紐付けチェックを実装する
-- [x] 3.2 `check-pr-issue.yml` に `if: github.event.pull_request.draft == false` を追加する
-- [x] 3.3 `.github/workflows/check-todo.yml` を新規作成し、Draft PR でも実行されるように `if` 条件なしで実装する
+- [x] 3.2 `check-pr-issue.yml` を Draft PR でも実行されるように `if` 条件なしで実装する
+- [x] 3.3 `.github/workflows/check-todo.yml` を新規作成し、`if: github.event.pull_request.draft == false` を追加する
 
 ## 4. 動作検証
 
-- [ ] 4.1 Draft PR を作成し、`check-todo` のみが実行されることを確認する
+- [ ] 4.1 Draft PR を作成し、`check-pr-issue` のみが実行されることを確認する
 - [ ] 4.2 PR を Ready for Review に切り替え、すべてのチェックが実行・パスすることを確認する

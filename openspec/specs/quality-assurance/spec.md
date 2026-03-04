@@ -47,7 +47,7 @@ Ready for Review に切り替わった際に、自動的にすべてのチェッ
 
 #### Scenario: Skip quality checks for Draft PR
 - **WHEN** PR のステータスが `draft` である
-- **THEN** `check-todo` 以外の品質チェック（Lint, Test, TypeCheck, OpenSpec）は実行されてはならない
+- **THEN** `check-pr-issue` 以外の品質チェック（Lint, Test, TypeCheck, OpenSpec, TODO）は実行されてはならない
 
 #### Scenario: Trigger all checks on Ready for Review
 - **WHEN** PR のステータスが `Ready for Review` に変更される
