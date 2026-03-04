@@ -1,18 +1,28 @@
+"""Script to register Discord slash commands."""
+
+import logging
 import sys
+
 import httpx
+
 from src.core.config import settings
 
-def register_commands():
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+def register_commands() -> None:
+    """Register slash commands with the Discord API."""
     app_id = settings.DISCORD_APPLICATION_ID
     token = settings.DISCORD_TOKEN
     guild_id = settings.DISCORD_GUILD_ID
 
-    if not token or token == "dummy_token":
-        print("Error: DISCORD_TOKEN is not set.")
+    if not token or token == "dummy_token":  # noqa: S105
+        logger.error("Error: DISCORD_TOKEN is not set.")
         sys.exit(1)
 
     if not app_id or app_id == "dummy_app_id":
-        print("Error: DISCORD_APPLICATION_ID is not set.")
+        logger.error("Error: DISCORD_APPLICATION_ID is not set.")
         sys.exit(1)
 
     # Define commands
@@ -27,10 +37,10 @@ def register_commands():
     # Registration URL
     if guild_id:
         url = f"https://discord.com/api/v10/applications/{app_id}/guilds/{guild_id}/commands"
-        print(f"Registering commands to guild: {guild_id}")
+        logger.info("Registering commands to guild: %s", guild_id)
     else:
         url = f"https://discord.com/api/v10/applications/{app_id}/commands"
-        print("Registering global commands")
+        logger.info("Registering global commands")
 
     headers = {
         "Authorization": f"Bot {token}",
@@ -40,15 +50,16 @@ def register_commands():
     try:
         response = httpx.put(url, headers=headers, json=commands)
         response.raise_for_status()
-        print(f"Successfully registered commands: {response.status_code}")
-        print(response.json())
+        logger.info("Successfully registered commands: %s", response.status_code)
+        logger.info("%s", response.json())
     except httpx.HTTPStatusError as e:
-        print(f"HTTP error occurred: {e}")
-        print(f"Response: {e.response.text}")
+        logger.exception("HTTP error occurred")
+        logger.error("Response: %s", e.response.text)  # noqa: TRY400
         sys.exit(1)
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    except Exception:
+        logger.exception("An error occurred")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     register_commands()

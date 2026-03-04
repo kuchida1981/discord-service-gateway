@@ -1,9 +1,13 @@
+"""Application configuration via pydantic-settings."""
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Application settings loaded from environment variables or .env file."""
+
     DISCORD_PUBLIC_KEY: str = "00" * 32
-    DISCORD_TOKEN: str = "dummy_token"
+    DISCORD_TOKEN: str = "dummy_token"  # noqa: S105
     DISCORD_APPLICATION_ID: str = "dummy_app_id"
     DISCORD_GUILD_ID: str | None = None
 
@@ -14,4 +18,4 @@ class Settings(BaseSettings):
     )
 
 
-settings = Settings()  # type: ignore
+settings = Settings()
