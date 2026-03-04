@@ -7,8 +7,8 @@ on:
       - main
 
 jobs:
-  python-checks:
-    name: Python Quality Checks
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -28,14 +28,44 @@ jobs:
       - name: Run Ruff format check
         run: uv run ruff format --check .
 
-      - name: Run Mypy type check
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run Mypy
         run: uv run mypy .
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
 
       - name: Run Pytest
         run: uv run pytest --cov=src --cov-report=term-missing --cov-fail-under=100
 
   docker-build:
-    name: Docker Build Verification
+    name: Docker Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
