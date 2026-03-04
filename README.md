@@ -1,0 +1,2 @@
+# discord-service-gateway
+Discord のスラッシュコマンドでn8nと他各種webサービスをコントロールするインタラクションエンドポイント実装
