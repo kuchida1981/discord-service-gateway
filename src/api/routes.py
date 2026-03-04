@@ -21,7 +21,7 @@ async def health_check() -> dict[str, str]:
 
 
 @router.post("/interactions", response_model=None)
-async def interactions(
+async def interactions(  # noqa: PLR0911
     request: Request,
     verified_body: bytes = Depends(verify_discord_signature),
     x_signature_ed25519: str = Header(None),
@@ -63,10 +63,10 @@ async def interactions(
                     status_code=response.status_code,
                 )
         except httpx.TimeoutException:
-            logger.error("Timeout forwarding to %s", settings.FORWARD_URL)
+            logger.exception("Timeout forwarding to %s", settings.FORWARD_URL)
             return {"error": "Forwarding timeout"}
-        except Exception as e:
-            logger.error("Error forwarding request: %s", e)
+        except Exception:
+            logger.exception("Error forwarding request")
             return {"error": "Forwarding failed"}
 
     # Normal processing in prod/local mode
