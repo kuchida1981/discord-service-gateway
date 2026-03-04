@@ -1,3 +1,9 @@
+## Purpose
+
+Cloud Run 上で動作するプロキシ機能の要件を定義し、開発時のリクエスト転送や認証制御の挙動を確立する。
+
+## Requirements
+
 ### Requirement: Cloud Run Interaction Proxying
 Cloud Run 環境で実行されているシステムは、設定された `MODE` が `dev` の場合、受信した Interaction リクエストを署名検証後に指定された `FORWARD_URL` へ転送しなければならない (SHALL)。
 

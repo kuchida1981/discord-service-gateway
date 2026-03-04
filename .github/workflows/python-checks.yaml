@@ -2,6 +2,7 @@ name: Python Quality Checks
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches:
       - main
@@ -9,6 +10,7 @@ on:
 jobs:
   lint:
     name: Lint
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -30,6 +32,7 @@ jobs:
 
   type-check:
     name: Type Check
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -48,6 +51,7 @@ jobs:
 
   test:
     name: Test
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -66,6 +70,7 @@ jobs:
 
   docker-build:
     name: Docker Build
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

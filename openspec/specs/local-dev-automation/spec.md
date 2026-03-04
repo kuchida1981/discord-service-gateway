@@ -1,3 +1,9 @@
+## Purpose
+
+ローカル開発環境の起動・停止に伴う、外部サービス（Cloud Run）の状態変更を自動化し、シームレスな開発体験を提供することを目的とする。
+
+## Requirements
+
 ### Requirement: Docker Compose Lifecycle Hooks for Mode Toggling
 システムは、`docker compose up` 起動時に Cloud Run を `dev` モードに切り替え、`docker compose down` 停止時に `prod` モードへ自動的に戻さなければならない (SHALL)。
 
