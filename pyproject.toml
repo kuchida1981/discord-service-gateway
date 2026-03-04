@@ -12,13 +12,16 @@ dependencies = [
     "uvicorn>=0.30.6",
 ]
 
-[dependency-groups]
-dev = [
+[tool.uv]
+dev-dependencies = [
     "mypy>=1.11.2",
     "pytest-asyncio>=0.24.0",
     "pytest>=8.3.3",
     "ruff>=0.6.8",
 ]
+
+[project.scripts]
+serve = "src.main:main"
 
 [tool.ruff]
 line-length = 88
