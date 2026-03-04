@@ -9,9 +9,6 @@ on:
         description: 'Deployment environment'
         required: false
         default: 'dev'
-  push:  # テスト用: feature ブランチへのプッシュでもトリガー
-    branches:
-      - feature/setup-cloud-run-deployment-and-proxy-specs
 
 env:
   REGION: ${{ secrets.GCP_REGION }}

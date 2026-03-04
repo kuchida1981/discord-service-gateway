@@ -1,7 +1,7 @@
 ## 1. GCP 準備 & 認証設定
 
 - [x] 1.1 WIF (Workload Identity Federation) セットアップ用スクリプトの作成 (`scripts/setup_gcp.sh`)
-- [ ] 1.2 ユーザーによる GCP プロジェクトでのスクリプト実行と GitHub Secrets の登録
+- [x] 1.2 ユーザーによる GCP プロジェクトでのスクリプト実行と GitHub Secrets の登録
 - [x] 1.3 Cloud Run / Artifact Registry / IAM API の有効化確認
 
 ## 2. アプリケーション・コアの実装
@@ -20,5 +20,5 @@
 ## 4. 疎通確認 & テスト
 
 - [ ] 4.1 `git tag` による初回のデプロイ成功の確認
-- [ ] 4.2 ローカル起動時の Cloud Run モード自動切替の動作確認
-- [ ] 4.3 Cloud Run (Proxy) -> Local (ngrok) 経由での Interaction 受信テスト
+- [x] 4.2 ローカル起動時の Cloud Run モード自動切替の動作確認
+- [x] 4.3 Cloud Run (Proxy) -> Local (ngrok) 経由での Interaction 受信テスト
