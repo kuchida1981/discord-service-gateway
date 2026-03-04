@@ -2,7 +2,7 @@
 
 OpenSpec の設計原則および運用ルールに基づき、ドキュメントの整合性が保たれていること、および変更内容が適切にアーカイブされた上でマージされることを自動検証することを目的とする。
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: OpenSpec Document Integrity
 すべての OpenSpec ドキュメント（changes, specs, artifacts）は、構文および構造上の整合性が保たれていなければならない (SHALL)。

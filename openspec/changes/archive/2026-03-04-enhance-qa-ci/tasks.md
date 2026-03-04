@@ -18,5 +18,5 @@
 
 ## 4. 動作検証
 
-- [ ] 4.1 Draft PR を作成し、`check-pr-issue` のみが実行されることを確認する
-- [ ] 4.2 PR を Ready for Review に切り替え、すべてのチェックが実行・パスすることを確認する
+- [x] 4.1 Draft PR を作成し、`check-pr-issue` のみが実行されることを確認する
+- [x] 4.2 PR を Ready for Review に切り替え、すべてのチェックが実行・パスすることを確認する

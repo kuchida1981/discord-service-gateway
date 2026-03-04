@@ -2,7 +2,7 @@
 
 プルリクエスト（PR）作成からマージまでの過程において、プロジェクトの運用ルール（Issueとの紐付け、タスクの完遂）が遵守されていることを自動的に検証し、トレーサビリティと品質を確保することを目的とする。
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Issue Linking
 すべての PR は、関連する Issue と紐付けられていなければならない (SHALL)。
