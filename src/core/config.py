@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     DISCORD_APPLICATION_ID: str = "dummy_app_id"
     DISCORD_GUILD_ID: str | None = None
 
+    NGROK_AUTHTOKEN: str | None = None
+    NGROK_DOMAIN: str | None = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
