@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     DISCORD_PUBLIC_KEY: str = "00" * 32
     DISCORD_TOKEN: str = "dummy_token"
     DISCORD_APPLICATION_ID: str = "dummy_app_id"
+    DISCORD_GUILD_ID: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
