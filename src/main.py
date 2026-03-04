@@ -1,5 +1,7 @@
 """Discord Service Gateway application entry point."""
 
+import asyncio
+import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -9,11 +11,16 @@ from fastapi import FastAPI
 from scripts.register_commands import register_commands
 from src.api.routes import router
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """Run startup tasks."""
-    register_commands()
+    try:
+        await asyncio.to_thread(register_commands)
+    except Exception:
+        logger.exception("Failed to register Discord commands; continuing startup")
     yield
 
 

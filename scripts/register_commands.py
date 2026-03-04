@@ -18,12 +18,10 @@ def register_commands() -> None:
     guild_id = settings.DISCORD_GUILD_ID
 
     if not token or token == "dummy_token":  # noqa: S105
-        logger.error("Error: DISCORD_TOKEN is not set.")
-        sys.exit(1)
+        raise RuntimeError("DISCORD_TOKEN is not set.")  # noqa: TRY003
 
     if not app_id or app_id == "dummy_app_id":
-        logger.error("Error: DISCORD_APPLICATION_ID is not set.")
-        sys.exit(1)
+        raise RuntimeError("DISCORD_APPLICATION_ID is not set.")  # noqa: TRY003
 
     # Define commands
     commands = [
@@ -55,11 +53,15 @@ def register_commands() -> None:
     except httpx.HTTPStatusError as e:
         logger.exception("HTTP error occurred")
         logger.error("Response: %s", e.response.text)  # noqa: TRY400
-        sys.exit(1)
+        raise
     except Exception:
         logger.exception("An error occurred")
-        sys.exit(1)
+        raise
 
 
 if __name__ == "__main__":
-    register_commands()
+    try:
+        register_commands()
+    except Exception:
+        logger.exception("Command registration failed")
+        sys.exit(1)
