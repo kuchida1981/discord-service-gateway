@@ -1,0 +1,45 @@
+name: Python Quality Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  python-checks:
+    name: Python Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run Ruff lint
+        run: uv run ruff check .
+
+      - name: Run Ruff format check
+        run: uv run ruff format --check .
+
+      - name: Run Mypy type check
+        run: uv run mypy .
+
+      - name: Run Pytest
+        run: uv run pytest --cov=src --cov-report=term-missing --cov-fail-under=100
+
+  docker-build:
+    name: Docker Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build .
