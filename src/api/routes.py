@@ -18,4 +18,13 @@ async def interactions(request: Request):
     if interaction.get("type") == 1:
         return {"type": 1}
 
+    # Type 2: APPLICATION_COMMAND
+    if interaction.get("type") == 2:
+        data = interaction.get("data", {})
+        if data.get("name") == "ping":
+            return {
+                "type": 4,  # CHANNEL_MESSAGE_WITH_SOURCE
+                "data": {"content": "Pong!"},
+            }
+
     return {"message": "received"}
