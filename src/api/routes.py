@@ -20,7 +20,7 @@ async def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@router.post("/interactions")
+@router.post("/interactions", response_model=None)
 async def interactions(
     request: Request,
     verified_body: bytes = Depends(verify_discord_signature),
