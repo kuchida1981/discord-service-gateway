@@ -27,6 +27,9 @@ GitHub Actions を導入し、プルリクエストおよび `main` ブランチ
 - **Docker ビルドチェックの導入**
   - ソースコードだけでなく、実行環境（Dockerfile）の健全性も同時に検証することで、デプロイ時の予期せぬ失敗を回避します。
 
+- **Python バージョンの固定: 3.11**
+  - Dockerfile では `ghcr.io/astral-sh/uv:python3.11-bookworm-slim` を使用し、Python 3.11 に固定しています。これにより、CI と本番環境での一貫性を保ちます。
+
 ## Risks / Trade-offs
 
 - **[Risk] CI 実行時間の増大** → **[Mitigation]** `uv` のキャッシュ機能 (`enable-cache: true`) を活用し、2回目以降のビルド時間を短縮します。
@@ -40,5 +43,4 @@ GitHub Actions を導入し、プルリクエストおよび `main` ブランチ
 
 ## Open Questions
 
-- 現状の Docker ビルドは `latest` Python をベースにしていますが、特定のバージョン（3.11）に固定すべきか。
 - Docker ビルド時にキャッシュを効かせるための `docker/build-push-action` などの導入要否。
