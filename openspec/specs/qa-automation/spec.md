@@ -2,7 +2,7 @@
 
 プルリクエスト（PR）作成からマージまでの過程において、プロジェクトの運用ルール（Issueとの紐付け、タスクの完遂）が遵守されていることを自動的に検証し、トレーサビリティと品質を確保することを目的とする。
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Issue Linking
 すべての PR は、関連する Issue と紐付けられていなければならない (SHALL)。
@@ -23,3 +23,7 @@ PR の説明欄に含まれるチェックリスト（`- [ ]` 形式）は、マ
 ### Requirement: Early Traceability
 Issue 紐付けの検証は、PR が Draft 状態であっても実行されなければならない (SHALL)。
 これにより、開発の初期段階から関連する Issue が明確に定義されていることを保証し、トレーサビリティを向上させる。
+
+#### Scenario: Continuous traceability check
+- **WHEN** PR が Draft 状態であっても、タイトルまたは本文が更新される
+- **THEN** 即座に Issue 番号の有無が検証されなければならない

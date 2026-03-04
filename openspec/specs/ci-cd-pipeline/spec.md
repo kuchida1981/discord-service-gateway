@@ -1,3 +1,9 @@
+## Purpose
+
+リリースタグの作成をトリガーとした、Cloud Run への安全かつ自動化されたデプロイパイプラインの仕様を定義する。
+
+## Requirements
+
 ### Requirement: GitHub Actions Based Deployment
 システムは、GitHub のリリースタグが作成された際に、Cloud Run への自動デプロイを開始しなければならない (SHALL)。
 
