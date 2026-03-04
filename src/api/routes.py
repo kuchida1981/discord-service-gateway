@@ -1,5 +1,6 @@
 """Discord interaction API routes."""
 
+import json
 import logging
 
 import httpx
@@ -49,6 +50,11 @@ async def interactions(  # noqa: PLR0911
         if x_signature_timestamp:
             forward_headers["X-Signature-Timestamp"] = x_signature_timestamp
         if settings.PROXY_SECRET:
+            if not settings.FORWARD_URL.startswith("https://"):
+                logger.warning(
+                    "PROXY_SECRET is set but FORWARD_URL is not HTTPS: %s",
+                    settings.FORWARD_URL,
+                )
             forward_headers["X-Proxy-Secret"] = settings.PROXY_SECRET
 
         try:
@@ -70,7 +76,7 @@ async def interactions(  # noqa: PLR0911
             return {"error": "Forwarding failed"}
 
     # Normal processing in prod/local mode
-    interaction = await request.json()
+    interaction = json.loads(verified_body)
 
     if interaction.get("type") == InteractionType.PING:
         return {"type": InteractionResponseType.PONG}

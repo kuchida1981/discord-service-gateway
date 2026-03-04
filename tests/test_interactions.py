@@ -194,6 +194,32 @@ def test_interactions_dev_mode_forwards_request_with_proxy_secret(
     assert response.json() == {"type": 1}
 
 
+def test_interactions_dev_mode_warns_on_http_with_proxy_secret(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that a warning is logged when PROXY_SECRET is used over HTTP."""
+    monkeypatch.setattr(settings, "MODE", "dev")
+    monkeypatch.setattr(settings, "FORWARD_URL", "http://localhost:8000")
+    monkeypatch.setattr(settings, "PROXY_SECRET", "secret123")
+
+    body, headers = _signed_request(monkeypatch, {"type": 1})
+
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"type": 1}
+    mock_response.status_code = 200
+
+    mock_client = AsyncMock()
+    mock_client.post = AsyncMock(return_value=mock_response)
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=None)
+
+    monkeypatch.setattr("src.api.routes.httpx.AsyncClient", lambda **_: mock_client)
+
+    response = client.post("/interactions", content=body, headers=headers)
+
+    assert response.status_code == 200
+
+
 def test_interactions_dev_mode_forwards_request(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

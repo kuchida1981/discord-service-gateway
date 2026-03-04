@@ -129,7 +129,6 @@ cmd_down() {
 cmd_restart() {
     info "Restarting development environment..."
     cmd_down
-    sleep 2
     cmd_up
 }
 

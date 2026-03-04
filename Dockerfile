@@ -13,4 +13,4 @@ COPY scripts/ ./scripts/
 # Cloud Run compatibility: Use PORT environment variable if set, otherwise default to 8000
 # In production (Cloud Run), --reload is omitted for performance
 ENV PORT=8000
-CMD uv run uvicorn src.main:app --host 0.0.0.0 --port ${PORT}
+CMD ["/bin/sh", "-c", "exec uv run uvicorn src.main:app --host 0.0.0.0 --port ${PORT}"]

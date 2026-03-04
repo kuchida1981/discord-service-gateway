@@ -26,7 +26,10 @@ async def verify_discord_signature(
 
     # Skip verification in local mode
     if settings.MODE == "local":
-        logger.info("MODE=local: Skipping signature verification")
+        logger.warning(
+            "MODE=local: Skipping signature verification. "
+            "Ensure this is not running in production."
+        )
         return body
 
     # Require headers in non-local modes
