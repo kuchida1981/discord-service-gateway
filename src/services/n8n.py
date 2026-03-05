@@ -14,6 +14,7 @@ async def check_health() -> tuple[bool, str]:
 
     Returns:
         Tuple of (is_healthy, message) where message describes the result.
+
     """
     try:
         async with httpx.AsyncClient(timeout=2.5) as client:

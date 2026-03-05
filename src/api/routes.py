@@ -23,7 +23,7 @@ async def health_check() -> dict[str, str]:
 
 
 @router.post("/interactions", response_model=None)
-async def interactions(  # noqa: PLR0911
+async def interactions(  # noqa: PLR0911, PLR0912
     request: Request,
     verified_body: bytes = Depends(verify_discord_signature),
     x_signature_ed25519: str = Header(None),
