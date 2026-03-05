@@ -59,7 +59,7 @@ def register_commands() -> None:
         raise
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     try:
         register_commands()
     except Exception:

@@ -8,8 +8,8 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 
-from scripts.register_commands import register_commands
 from src.api.routes import router
+from src.cli.register_commands import register_commands
 
 logger = logging.getLogger(__name__)
 
