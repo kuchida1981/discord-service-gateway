@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     NGROK_AUTHTOKEN: str | None = None
     NGROK_DOMAIN: str | None = None
 
+    N8N_HEALTH_URL: str
+
     # Cloud Run Proxy Settings
     MODE: str = "prod"  # prod, dev, local
     FORWARD_URL: str | None = None  # ngrok URL for dev mode
@@ -26,4 +28,4 @@ class Settings(BaseSettings):
     )
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]

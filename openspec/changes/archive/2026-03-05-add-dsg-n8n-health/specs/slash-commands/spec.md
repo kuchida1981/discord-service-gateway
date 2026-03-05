@@ -1,15 +1,4 @@
-## Purpose
-
-Discord のスラッシュコマンド（APPLICATION_COMMAND）を定義し、適切に応答・登録するための仕様。
-
-## Requirements
-
-### Requirement: Ping Command Response
-システムはスラッシュコマンド `/ping` を受信した際、即座にメッセージ `Pong!` を返さなければならない (SHALL)。
-
-#### Scenario: User sends /ping
-- **WHEN** システムが `data.name` が `ping` である `type: 2` インタラクションを受信する
-- **THEN** システムは HTTP 200 OK と共に `{"type": 4, "data": {"content": "Pong!"}}` を返さなければならない
+## MODIFIED Requirements
 
 ### Requirement: Discord Command Registration
 システムは、定義されたスラッシュコマンド（階層構造を含む）を Discord API に対して登録するための独立した手段を提供しなければならない (SHALL)。
