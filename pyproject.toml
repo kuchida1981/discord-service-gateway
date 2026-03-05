@@ -33,7 +33,7 @@ dev = [
 
 [project.scripts]
 serve = "src.main:main"
-register-commands = "src.cli.register_commands:register_commands"
+register-commands = "src.cli.register_commands:main"
 toggle-mode = "src.cli.toggle_mode:main"
 
 [tool.ruff]

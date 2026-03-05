@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 import httpx
 import pytest
 
+from src.cli.register_commands import main as register_commands_main
 from src.cli.register_commands import register_commands
 from src.cli.toggle_mode import get_current_mode, main, run_command, toggle_mode
 
@@ -250,3 +251,29 @@ def test_main_prod_mode(monkeypatch: pytest.MonkeyPatch) -> None:
         service_name="discord-gateway",
         forward_url=None,
     )
+
+
+# --- register_commands main() tests ---
+
+
+def test_register_commands_main_success() -> None:
+    """Test that main() calls register_commands."""
+    with (
+        patch("sys.argv", ["register-commands"]),
+        patch("src.cli.register_commands.register_commands") as mock_register,
+    ):
+        register_commands_main()
+    mock_register.assert_called_once()
+
+
+def test_register_commands_main_failure_exits() -> None:
+    """Test that main() exits on error."""
+    with (
+        patch("sys.argv", ["register-commands"]),
+        patch(
+            "src.cli.register_commands.register_commands",
+            side_effect=RuntimeError("fail"),
+        ),
+        pytest.raises(SystemExit),
+    ):
+        register_commands_main()
