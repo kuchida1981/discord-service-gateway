@@ -169,6 +169,15 @@ def test_get_current_mode_no_spec() -> None:
     assert env == {}
 
 
+def test_get_current_mode_partial_spec() -> None:
+    """Test get_current_mode with a partially complete spec (missing inner spec key)."""
+    service_json: dict[str, object] = {"spec": {"template": {}}}
+    mock_result = _make_proc(0, stdout=json.dumps(service_json))
+    with patch("src.cli.toggle_mode.run_command", return_value=mock_result):
+        env = get_current_mode("proj", "region", "svc")
+    assert env == {}
+
+
 def test_toggle_mode_invalid_mode() -> None:
     """Test that invalid mode exits."""
     with pytest.raises(SystemExit):
