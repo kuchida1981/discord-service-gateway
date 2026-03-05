@@ -30,8 +30,30 @@ def register_commands() -> None:
             "name": "ping",
             "description": "Replies with Pong!",
             "type": 1,  # CHAT_INPUT
-        }
+        },
+        {
+            "name": "dsg",
+            "description": "Discord Service Gateway commands",
+            "type": 1,  # CHAT_INPUT
+            "options": [
+                {
+                    "name": "n8n",
+                    "description": "n8n workflow automation commands",
+                    "type": 2,  # SUB_COMMAND_GROUP
+                    "options": [
+                        {
+                            "name": "health",
+                            "description": "Check n8n health status",
+                            "type": 1,  # SUB_COMMAND
+                        }
+                    ],
+                }
+            ],
+        },
     ]
+    logger.info(
+        "Registering %d command(s): %s", len(commands), [c["name"] for c in commands]
+    )
 
     # Registration URL
     if guild_id:

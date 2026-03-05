@@ -302,3 +302,83 @@ def test_interactions_dev_mode_forwarding_error(
 
     assert response.status_code == 200
     assert response.json() == {"error": "Forwarding failed"}
+
+
+def test_interactions_dsg_n8n_health_success(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that /dsg n8n health returns ok message when n8n is healthy."""
+    body, headers = _signed_request(
+        monkeypatch,
+        {
+            "type": 2,
+            "data": {
+                "name": "dsg",
+                "type": 1,
+                "options": [
+                    {
+                        "name": "n8n",
+                        "type": 2,
+                        "options": [{"name": "health", "type": 1}],
+                    }
+                ],
+            },
+        },
+    )
+
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"status": "ok"}
+    mock_response.raise_for_status = MagicMock()
+
+    mock_client = AsyncMock()
+    mock_client.get = AsyncMock(return_value=mock_response)
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=None)
+
+    monkeypatch.setattr("src.services.n8n.httpx.AsyncClient", lambda **_: mock_client)
+
+    response = client.post("/interactions", content=body, headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "type": 4,
+        "data": {"content": "n8n status: ok ✅"},
+    }
+
+
+def test_interactions_dsg_n8n_health_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that /dsg n8n health returns error message when n8n is unhealthy."""
+    body, headers = _signed_request(
+        monkeypatch,
+        {
+            "type": 2,
+            "data": {
+                "name": "dsg",
+                "type": 1,
+                "options": [
+                    {
+                        "name": "n8n",
+                        "type": 2,
+                        "options": [{"name": "health", "type": 1}],
+                    }
+                ],
+            },
+        },
+    )
+
+    mock_client = AsyncMock()
+    mock_client.get = AsyncMock(side_effect=httpx.TimeoutException("timeout"))
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=None)
+
+    monkeypatch.setattr("src.services.n8n.httpx.AsyncClient", lambda **_: mock_client)
+
+    response = client.post("/interactions", content=body, headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "type": 4,
+        "data": {"content": "n8n status: error ❌ (timeout)"},
+    }

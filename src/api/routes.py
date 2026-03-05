@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from src.api.deps import verify_discord_signature
 from src.core.config import settings
 from src.core.constants import InteractionResponseType, InteractionType
+from src.services import n8n as n8n_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -88,5 +89,17 @@ async def interactions(  # noqa: PLR0911
                 "type": InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 "data": {"content": "Pong!"},
             }
+        if data.get("name") == "dsg":
+            options = data.get("options", [])
+            if options:
+                group = options[0]
+                if group["name"] == "n8n":
+                    sub_options = group.get("options", [])
+                    if sub_options and sub_options[0]["name"] == "health":
+                        _, message = await n8n_service.check_health()
+                        return {
+                            "type": InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                            "data": {"content": message},
+                        }
 
     return {"message": "received"}
