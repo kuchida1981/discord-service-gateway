@@ -50,11 +50,11 @@ def get_current_mode(project_id: str, region: str, service_name: str) -> dict[st
     service_data = json.loads(result.stdout)
 
     env_vars = {}
-    if "spec" in service_data and "template" in service_data["spec"]:
-        containers = service_data["spec"]["template"]["spec"]["containers"]
-        if containers and "env" in containers[0]:
-            for env in containers[0]["env"]:
-                env_vars[env["name"]] = env.get("value", "")
+    template = service_data.get("spec", {}).get("template", {})
+    containers = template.get("spec", {}).get("containers", [])
+    if containers and "env" in containers[0]:
+        for env in containers[0]["env"]:
+            env_vars[env["name"]] = env.get("value", "")
 
     return env_vars
 
@@ -167,5 +167,5 @@ def main() -> None:
     )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

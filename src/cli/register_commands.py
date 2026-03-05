@@ -1,5 +1,6 @@
 """Script to register Discord slash commands."""
 
+import argparse
 import logging
 import sys
 
@@ -59,9 +60,19 @@ def register_commands() -> None:
         raise
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run the CLI entrypoint."""
+    parser = argparse.ArgumentParser(
+        description="Register Discord slash commands via the Discord API"
+    )
+    parser.parse_args()
+
     try:
         register_commands()
     except Exception:
         logger.exception("Command registration failed")
         sys.exit(1)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    main()

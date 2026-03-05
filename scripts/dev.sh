@@ -71,10 +71,10 @@ toggle_cloud_run() {
 
     info "Toggling Cloud Run to $mode mode..."
 
-    local cmd=("$SCRIPT_DIR/toggle_mode.py" "$mode")
+    local cmd=("uv" "run" "toggle-mode" "$mode")
     [[ -n "$forward_url" ]] && cmd+=("--url" "$forward_url")
 
-    if python3 "${cmd[@]}"; then
+    if "${cmd[@]}"; then
         success "Cloud Run mode switched to $mode"
     else
         error "Failed to toggle Cloud Run mode"
