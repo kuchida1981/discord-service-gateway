@@ -139,9 +139,7 @@ def test_get_current_mode() -> None:
     service_json = {
         "spec": {
             "template": {
-                "spec": {
-                    "containers": [{"env": [{"name": "MODE", "value": "prod"}]}]
-                }
+                "spec": {"containers": [{"env": [{"name": "MODE", "value": "prod"}]}]}
             }
         }
     }
@@ -153,7 +151,9 @@ def test_get_current_mode() -> None:
 
 def test_get_current_mode_empty_containers() -> None:
     """Test get_current_mode when spec has no containers."""
-    service_json: dict = {"spec": {"template": {"spec": {"containers": []}}}}
+    service_json: dict[str, object] = {
+        "spec": {"template": {"spec": {"containers": []}}}
+    }
     mock_result = _make_proc(0, stdout=json.dumps(service_json))
     with patch("src.cli.toggle_mode.run_command", return_value=mock_result):
         env = get_current_mode("proj", "region", "svc")
@@ -189,7 +189,9 @@ def test_toggle_mode_dev() -> None:
         patch("src.cli.toggle_mode.get_current_mode", side_effect=side_effects),
         patch("src.cli.toggle_mode.run_command") as mock_run,
     ):
-        toggle_mode("dev", "proj", "region", "svc", forward_url="https://example.ngrok.io")
+        toggle_mode(
+            "dev", "proj", "region", "svc", forward_url="https://example.ngrok.io"
+        )
     mock_run.assert_called_once()
 
 
