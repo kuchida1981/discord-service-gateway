@@ -25,13 +25,8 @@ async def handle_dsg_n8n_health() -> dict[str, object]:
 async def handle_dsg_command(data: models.DsgCommandData) -> dict[str, object] | None:
     """Handle the /dsg command."""
     # Since we only have /dsg n8n health for now, we can check the first option
-    if not data.options:
-        return None
-
     group = data.options[0]
     if group.name == "n8n":
-        if not group.options:
-            return None
         sub_option = group.options[0]
         if sub_option.name == "health":
             return await handle_dsg_n8n_health()

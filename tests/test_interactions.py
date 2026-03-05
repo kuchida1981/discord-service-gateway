@@ -54,6 +54,7 @@ def test_interactions_slash_command_ping_success(
         "type": 2,
         "data": {
             "name": "ping",
+            "id": "123",
             "type": 1,
         },
     }
@@ -314,6 +315,7 @@ def test_interactions_dsg_n8n_health_success(
             "type": 2,
             "data": {
                 "name": "dsg",
+                "id": "123",
                 "type": 1,
                 "options": [
                     {
@@ -356,6 +358,7 @@ def test_interactions_dsg_n8n_health_failure(
             "type": 2,
             "data": {
                 "name": "dsg",
+                "id": "123",
                 "type": 1,
                 "options": [
                     {
@@ -412,6 +415,7 @@ def test_interactions_unknown_command_returns_400(
             "type": 2,
             "data": {
                 "name": "unknown-command",
+                "id": "123",
                 "type": 1,
             },
         },

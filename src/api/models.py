@@ -26,24 +26,24 @@ class N8nGroup(BaseModel):
 
     name: Literal["n8n"]
     type: int
-    options: list[HealthOption]
+    options: Annotated[list[HealthOption], Field(min_length=1)]
 
 
 class PingCommandData(BaseModel):
     """Data for the /ping command."""
 
     name: Literal["ping"]
-    id: str | None = None
-    type: int | None = None
+    id: str
+    type: int
 
 
 class DsgCommandData(BaseModel):
     """Data for the /dsg command."""
 
     name: Literal["dsg"]
-    id: str | None = None
-    type: int | None = None
-    options: list[N8nGroup]
+    id: str
+    type: int
+    options: Annotated[list[N8nGroup], Field(min_length=1)]
 
 
 CommandData = Annotated[

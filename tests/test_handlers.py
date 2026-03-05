@@ -10,7 +10,7 @@ from src.api import handlers, models
 @pytest.mark.asyncio
 async def test_handle_application_command_ping() -> None:
     """Test handle_application_command with /ping."""
-    data = models.PingCommandData(name="ping")
+    data = models.PingCommandData(name="ping", id="123", type=1)
     result = await handlers.handle_application_command(data)
     assert result is not None
     data_field = result.get("data")
@@ -25,6 +25,8 @@ async def test_handle_application_command_dsg_health(
     """Test handle_application_command with /dsg n8n health."""
     data = models.DsgCommandData(
         name="dsg",
+        id="123",
+        type=1,
         options=[
             models.N8nGroup(
                 name="n8n",
@@ -53,29 +55,6 @@ async def test_handle_application_command_dsg_health(
 
 
 @pytest.mark.asyncio
-async def test_handle_dsg_command_no_options() -> None:
-    """Test handle_dsg_command with no options."""
-    data = models.DsgCommandData(name="dsg", options=[])
-    result = await handlers.handle_dsg_command(data)
-    assert result is None
-
-
-@pytest.mark.asyncio
-async def test_handle_dsg_command_no_group_options() -> None:
-    """Test handle_dsg_command with a group having no options."""
-    # Mocking N8nGroup to bypass Literal if necessary
-    # Actually, we can just use models.N8nGroup with empty options if allowed
-    try:
-        group = models.N8nGroup(name="n8n", type=2, options=[])
-        data = models.DsgCommandData(name="dsg", options=[group])
-        result = await handlers.handle_dsg_command(data)
-        assert result is None
-    except Exception:
-        # If Pydantic prevents empty list, it won't be parsed anyway
-        pytest.skip("Pydantic prevented creating N8nGroup with empty options")
-
-
-@pytest.mark.asyncio
 async def test_handle_dsg_command_unknown_sub_option() -> None:
     """Test handle_dsg_command with unknown sub-option in n8n group."""
 
@@ -90,6 +69,8 @@ async def test_handle_dsg_command_unknown_sub_option() -> None:
     )
     data = models.DsgCommandData.model_construct(
         name="dsg",
+        id="123",
+        type=1,
         options=[group],
     )
     result = await handlers.handle_dsg_command(data)
