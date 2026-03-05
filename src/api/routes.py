@@ -93,9 +93,9 @@ async def interactions(  # noqa: PLR0911
             options = data.get("options", [])
             if options:
                 group = options[0]
-                if group["name"] == "n8n":
+                if group.get("name") == "n8n":
                     sub_options = group.get("options", [])
-                    if sub_options and sub_options[0]["name"] == "health":
+                    if sub_options and sub_options[0].get("name") == "health":
                         _, message = await n8n_service.check_health()
                         return {
                             "type": InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
