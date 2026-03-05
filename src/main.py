@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     """Run startup tasks."""
     try:
         await asyncio.to_thread(register_commands)
