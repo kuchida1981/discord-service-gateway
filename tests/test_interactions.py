@@ -382,3 +382,24 @@ def test_interactions_dsg_n8n_health_failure(
         "type": 4,
         "data": {"content": "n8n status: error ❌ (timeout)"},
     }
+
+
+def test_interactions_unknown_command_returns_received(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that an unknown slash command returns a generic received response."""
+    body, headers = _signed_request(
+        monkeypatch,
+        {
+            "type": 2,
+            "data": {
+                "name": "unknown-command",
+                "type": 1,
+            },
+        },
+    )
+
+    response = client.post("/interactions", content=body, headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "received"}
