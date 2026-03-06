@@ -6,8 +6,9 @@ import logging
 import httpx
 from fastapi import APIRouter, Depends, Header, Request
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 
-from src.api import handlers
+from src.api import handlers, models
 from src.api.deps import verify_discord_signature
 from src.core.config import settings
 from src.core.constants import InteractionResponseType, InteractionType
@@ -86,13 +87,23 @@ async def interactions(
             request, verified_body, x_signature_ed25519, x_signature_timestamp
         )
 
-    interaction = json.loads(verified_body)
+    try:
+        interaction_data = json.loads(verified_body)
+        interaction = models.Interaction.model_validate(interaction_data)
+    except json.JSONDecodeError, ValidationError:
+        logger.exception("Invalid interaction data")
+        return JSONResponse(content={"error": "Invalid interaction"}, status_code=400)
 
-    if interaction.get("type") == InteractionType.PING:
+    if interaction.type == InteractionType.PING:
         return {"type": InteractionResponseType.PONG}
 
-    if interaction.get("type") == InteractionType.APPLICATION_COMMAND:
-        result = await handlers.handle_application_command(interaction.get("data", {}))
+    if interaction.type == InteractionType.APPLICATION_COMMAND:
+        if interaction.data is None:
+            return JSONResponse(
+                content={"error": "Missing data for application command"},
+                status_code=400,
+            )
+        result = await handlers.handle_application_command(interaction.data)
         if result is not None:
             return result
 

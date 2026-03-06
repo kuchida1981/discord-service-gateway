@@ -54,6 +54,7 @@ def test_interactions_slash_command_ping_success(
         "type": 2,
         "data": {
             "name": "ping",
+            "id": "123",
             "type": 1,
         },
     }
@@ -314,6 +315,7 @@ def test_interactions_dsg_n8n_health_success(
             "type": 2,
             "data": {
                 "name": "dsg",
+                "id": "123",
                 "type": 1,
                 "options": [
                     {
@@ -356,6 +358,7 @@ def test_interactions_dsg_n8n_health_failure(
             "type": 2,
             "data": {
                 "name": "dsg",
+                "id": "123",
                 "type": 1,
                 "options": [
                     {
@@ -384,16 +387,35 @@ def test_interactions_dsg_n8n_health_failure(
     }
 
 
-def test_interactions_unknown_command_returns_received(
+def test_interactions_slash_command_missing_data(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Test that an unknown slash command returns a generic received response."""
+    """Test that an APPLICATION_COMMAND without data returns HTTP 400."""
+    body, headers = _signed_request(
+        monkeypatch,
+        {
+            "type": 2,
+            # "data" is missing
+        },
+    )
+
+    response = client.post("/interactions", content=body, headers=headers)
+
+    assert response.status_code == 400
+    assert response.json() == {"error": "Missing data for application command"}
+
+
+def test_interactions_unknown_command_returns_400(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that an unknown slash command returns HTTP 400."""
     body, headers = _signed_request(
         monkeypatch,
         {
             "type": 2,
             "data": {
                 "name": "unknown-command",
+                "id": "123",
                 "type": 1,
             },
         },
@@ -401,5 +423,5 @@ def test_interactions_unknown_command_returns_received(
 
     response = client.post("/interactions", content=body, headers=headers)
 
-    assert response.status_code == 200
-    assert response.json() == {"message": "received"}
+    assert response.status_code == 400
+    assert response.json() == {"error": "Invalid interaction"}
