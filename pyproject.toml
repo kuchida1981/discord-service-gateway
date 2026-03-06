@@ -39,13 +39,17 @@ toggle-mode = "src.cli.toggle_mode:main"
 [tool.ruff]
 line-length = 88
 target-version = "py314"
+exclude = ["check_var.py", "repro_issue_20.py", "test_except.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "UP", "ASYNC", "S", "B", "C4", "DTZ", "T20", "RET", "SIM", "ARG", "PTH", "ERA", "PL", "RUF", "D", "ANN", "PT", "TRY", "TID", "C90"]
 ignore = ["D203", "D213"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["S101", "PLR2004"]
+"src/cli/**/*.py" = ["T201", "S603", "S105"]
+"src/core/config.py" = ["S105"]
+"src/main.py" = ["S104"]
+"tests/**/*.py" = ["S101", "S105", "PLR2004"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -56,3 +60,4 @@ addopts = "--cov=src --cov-report=term-missing --cov-fail-under=100"
 python_version = "3.14"
 strict = true
 ignore_missing_imports = true
+exclude = ["check_var\\.py", "repro_issue_20\\.py", "test_except\\.py"]

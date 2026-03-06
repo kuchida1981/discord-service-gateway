@@ -10,6 +10,7 @@ import pytest
 from src.cli.register_commands import main as register_commands_main
 from src.cli.register_commands import register_commands
 from src.cli.toggle_mode import get_current_mode, main, run_command, toggle_mode
+from src.core.exceptions import ConfigurationError
 
 # --- register_commands tests ---
 
@@ -26,7 +27,7 @@ def test_register_commands_success() -> None:
         patch("httpx.put", return_value=mock_response),
     ):
         mock_settings.DISCORD_APPLICATION_ID = "app123"
-        mock_settings.DISCORD_TOKEN = "token123"  # noqa: S105
+        mock_settings.DISCORD_TOKEN = "token123"
         mock_settings.DISCORD_GUILD_ID = "guild456"
         register_commands()
 
@@ -45,7 +46,7 @@ def test_register_commands_global_when_no_guild() -> None:
         patch("httpx.put", return_value=mock_response) as mock_put,
     ):
         mock_settings.DISCORD_APPLICATION_ID = "app123"
-        mock_settings.DISCORD_TOKEN = "token123"  # noqa: S105
+        mock_settings.DISCORD_TOKEN = "token123"
         mock_settings.DISCORD_GUILD_ID = None
         register_commands()
 
@@ -54,22 +55,22 @@ def test_register_commands_global_when_no_guild() -> None:
 
 
 def test_register_commands_raises_when_token_missing() -> None:
-    """Test that missing DISCORD_TOKEN raises RuntimeError."""
+    """Test that missing DISCORD_TOKEN raises ConfigurationError."""
     with patch("src.cli.register_commands.settings") as mock_settings:
-        mock_settings.DISCORD_TOKEN = "dummy_token"  # noqa: S105
+        mock_settings.DISCORD_TOKEN = "dummy_token"
         mock_settings.DISCORD_APPLICATION_ID = "app123"
         mock_settings.DISCORD_GUILD_ID = None
-        with pytest.raises(RuntimeError):
+        with pytest.raises(ConfigurationError):
             register_commands()
 
 
 def test_register_commands_raises_when_app_id_missing() -> None:
-    """Test that missing DISCORD_APPLICATION_ID raises RuntimeError."""
+    """Test that missing DISCORD_APPLICATION_ID raises ConfigurationError."""
     with patch("src.cli.register_commands.settings") as mock_settings:
-        mock_settings.DISCORD_TOKEN = "real_token"  # noqa: S105
+        mock_settings.DISCORD_TOKEN = "real_token"
         mock_settings.DISCORD_APPLICATION_ID = "dummy_app_id"
         mock_settings.DISCORD_GUILD_ID = None
-        with pytest.raises(RuntimeError):
+        with pytest.raises(ConfigurationError):
             register_commands()
 
 
@@ -87,7 +88,7 @@ def test_register_commands_http_error() -> None:
         patch("src.cli.register_commands.settings") as mock_settings,
         patch("httpx.put", return_value=mock_put_response),
     ):
-        mock_settings.DISCORD_TOKEN = "real_token"  # noqa: S105
+        mock_settings.DISCORD_TOKEN = "real_token"
         mock_settings.DISCORD_APPLICATION_ID = "real_app"
         mock_settings.DISCORD_GUILD_ID = None
         with pytest.raises(httpx.HTTPStatusError):
@@ -100,7 +101,7 @@ def test_register_commands_generic_error() -> None:
         patch("src.cli.register_commands.settings") as mock_settings,
         patch("httpx.put", side_effect=ConnectionError("Network error")),
     ):
-        mock_settings.DISCORD_TOKEN = "real_token"  # noqa: S105
+        mock_settings.DISCORD_TOKEN = "real_token"
         mock_settings.DISCORD_APPLICATION_ID = "real_app"
         mock_settings.DISCORD_GUILD_ID = None
         with pytest.raises(ConnectionError):

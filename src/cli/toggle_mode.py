@@ -16,20 +16,20 @@ def run_command(
     cmd: list[str], capture_output: bool = False
 ) -> subprocess.CompletedProcess[str]:
     """Run a shell command and handle errors."""
-    print(f"Running: {' '.join(cmd)}")  # noqa: T201
-    result = subprocess.run(  # noqa: S603
+    print(f"Running: {' '.join(cmd)}")
+    result = subprocess.run(
         cmd,
         capture_output=capture_output,
         text=True,
         check=False,
     )
     if result.returncode != 0:
-        print(  # noqa: T201
+        print(
             f"Error: Command failed with exit code {result.returncode}",
             file=sys.stderr,
         )
         if result.stderr:
-            print(result.stderr, file=sys.stderr)  # noqa: T201
+            print(result.stderr, file=sys.stderr)
         sys.exit(1)
     return result
 
@@ -68,23 +68,21 @@ def toggle_mode(
 ) -> None:
     """Toggle Cloud Run service mode."""
     if mode not in ["prod", "dev"]:
-        print("Error: mode must be 'prod' or 'dev'", file=sys.stderr)  # noqa: T201
+        print("Error: mode must be 'prod' or 'dev'", file=sys.stderr)
         sys.exit(1)
 
     if mode == "dev" and not forward_url:
-        print(  # noqa: T201
-            "Error: --url is required when switching to dev mode", file=sys.stderr
-        )
+        print("Error: --url is required when switching to dev mode", file=sys.stderr)
         sys.exit(1)
 
-    print(f"\nSwitching Cloud Run service to {mode.upper()} mode...")  # noqa: T201
-    print(f"   Project: {project_id}")  # noqa: T201
-    print(f"   Region: {region}")  # noqa: T201
-    print(f"   Service: {service_name}")  # noqa: T201
+    print(f"\nSwitching Cloud Run service to {mode.upper()} mode...")
+    print(f"   Project: {project_id}")
+    print(f"   Region: {region}")
+    print(f"   Service: {service_name}")
 
     # Get current environment variables
     current_env = get_current_mode(project_id, region, service_name)
-    print(f"\nCurrent MODE: {current_env.get('MODE', 'not set')}")  # noqa: T201
+    print(f"\nCurrent MODE: {current_env.get('MODE', 'not set')}")
 
     # Build update command
     cmd = [
@@ -98,7 +96,7 @@ def toggle_mode(
     ]
 
     if mode == "dev":
-        print(f"   Forward URL: {forward_url}")  # noqa: T201
+        print(f"   Forward URL: {forward_url}")
         cmd.append(f"--update-env-vars=MODE=dev,FORWARD_URL={forward_url}")
     else:  # prod
         cmd.append("--update-env-vars=MODE=prod")
@@ -108,15 +106,13 @@ def toggle_mode(
     run_command(cmd)
 
     # Verify the change
-    print("\nMode switch complete!")  # noqa: T201
+    print("\nMode switch complete!")
     new_env = get_current_mode(project_id, region, service_name)
-    print(f"   New MODE: {new_env.get('MODE', 'not set')}")  # noqa: T201
+    print(f"   New MODE: {new_env.get('MODE', 'not set')}")
     if mode == "dev":
-        print(f"   FORWARD_URL: {new_env.get('FORWARD_URL', 'not set')}")  # noqa: T201
+        print(f"   FORWARD_URL: {new_env.get('FORWARD_URL', 'not set')}")
 
-    print(  # noqa: T201
-        "\nNote: It may take ~30 seconds for the new revision to become active."
-    )
+    print("\nNote: It may take ~30 seconds for the new revision to become active.")
 
 
 def main() -> None:
@@ -152,7 +148,7 @@ def main() -> None:
     args = parser.parse_args()
 
     if not args.project:
-        print(  # noqa: T201
+        print(
             "Error: --project or GCP_PROJECT_ID environment variable required",
             file=sys.stderr,
         )

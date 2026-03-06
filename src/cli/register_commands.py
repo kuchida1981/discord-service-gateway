@@ -7,6 +7,7 @@ import sys
 import httpx
 
 from src.core.config import settings
+from src.core.exceptions import MissingApplicationIdError, MissingTokenError
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,11 +19,11 @@ def register_commands() -> None:
     token = settings.DISCORD_TOKEN
     guild_id = settings.DISCORD_GUILD_ID
 
-    if not token or token == "dummy_token":  # noqa: S105
-        raise RuntimeError("DISCORD_TOKEN is not set.")  # noqa: TRY003
+    if not token or token == "dummy_token":
+        raise MissingTokenError()
 
     if not app_id or app_id == "dummy_app_id":
-        raise RuntimeError("DISCORD_APPLICATION_ID is not set.")  # noqa: TRY003
+        raise MissingApplicationIdError()
 
     # Define commands
     commands = [
@@ -74,8 +75,7 @@ def register_commands() -> None:
         logger.info("Successfully registered commands: %s", response.status_code)
         logger.info("%s", response.json())
     except httpx.HTTPStatusError as e:
-        logger.exception("HTTP error occurred")
-        logger.error("Response: %s", e.response.text)  # noqa: TRY400
+        logger.exception("HTTP error occurred. Response: %s", e.response.text)
         raise
     except Exception:
         logger.exception("An error occurred")
