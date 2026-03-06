@@ -53,7 +53,7 @@ async def verify_discord_signature(
         verify_key.verify(message, bytes.fromhex(signature))
         logger.info("Signature verification successful.")
     except (BadSignatureError, ValueError) as e:
-        logger.error("Signature verification failed: %s", e)  # noqa: TRY400
+        logger.warning("Signature verification failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid request signature",
