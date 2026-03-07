@@ -48,7 +48,19 @@ def register_commands() -> None:
                             "type": 1,  # SUB_COMMAND
                         }
                     ],
-                }
+                },
+                {
+                    "name": "tasks",
+                    "description": "Google Tasks commands",
+                    "type": 2,  # SUB_COMMAND_GROUP
+                    "options": [
+                        {
+                            "name": "list",
+                            "description": "Show active Google Tasks",
+                            "type": 1,  # SUB_COMMAND
+                        }
+                    ],
+                },
             ],
         },
     ]
