@@ -9,6 +9,26 @@ from src.core.config import settings
 logger = logging.getLogger(__name__)
 
 
+async def get_tasks_list() -> str:
+    """Fetch active task list from n8n webhook.
+
+    Returns:
+        Markdown-formatted task list string from n8n.
+
+    Raises:
+        Exception: On timeout or HTTP error.
+
+    """
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await client.post(settings.N8N_TASKS_LIST_URL, json={})
+        response.raise_for_status()
+        content_type = response.headers.get("content-type", "")
+        if "application/json" in content_type:
+            data = response.json()
+            return data.get("content", "現在アクティブなタスクはありません。")
+        return response.text or "現在アクティブなタスクはありません。"
+
+
 async def check_health() -> tuple[bool, str]:
     """Check n8n health status.
 
