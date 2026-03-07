@@ -108,10 +108,6 @@ def toggle_mode(
         print("Error: mode must be 'prod' or 'dev'", file=sys.stderr)
         sys.exit(1)
 
-    if mode == "dev" and not forward_url:
-        print("Error: --url is required when switching to dev mode", file=sys.stderr)
-        sys.exit(1)
-
     print(f"\nSwitching Cloud Run service to {mode.upper()} mode...")
     print(f"   Project: {gcp.project_id}")
     print(f"   Region: {gcp.region}")
@@ -131,13 +127,21 @@ def toggle_mode(
     ]
 
     if mode == "dev":
+        if not forward_url:
+            print(
+                "Error: --url is required when switching to dev mode",
+                file=sys.stderr,
+            )
+            sys.exit(1)
         print(f"   Forward URL: {forward_url}")
-        env_updates = ["MODE=dev", f"FORWARD_URL={forward_url}"]
+        safe_url = forward_url.replace(",", "\\,")
+        env_updates = ["MODE=dev", f"FORWARD_URL={safe_url}"]
         if sync and env_file:
             local_env = load_env_file(env_file)
             for var in SYNC_ENV_VARS:
                 if var in local_env:
-                    env_updates.append(f"{var}={local_env[var]}")
+                    safe_val = local_env[var].replace(",", "\\,")
+                    env_updates.append(f"{var}={safe_val}")
                     print(f"   Syncing {var} from local .env")
         cmd.append(f"--update-env-vars={','.join(env_updates)}")
     else:  # prod

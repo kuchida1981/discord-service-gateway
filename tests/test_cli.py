@@ -199,7 +199,10 @@ def test_toggle_mode_invalid_mode() -> None:
 
 def test_toggle_mode_dev_without_url() -> None:
     """Test that dev mode without URL exits."""
-    with pytest.raises(SystemExit):
+    with (
+        patch("src.cli.toggle_mode.get_current_mode", return_value={"MODE": "prod"}),
+        pytest.raises(SystemExit),
+    ):
         toggle_mode("dev", _GCP, forward_url=None)
 
 
@@ -362,6 +365,33 @@ def test_toggle_mode_dev_with_sync(tmp_path: Path) -> None:
     update_arg = next(a for a in call_args if a.startswith("--update-env-vars="))
     assert "DISCORD_PUBLIC_KEY=mykey" in update_arg
     assert "PROXY_SECRET=mysecret" in update_arg
+
+
+def test_toggle_mode_dev_escapes_commas_in_values(tmp_path: Path) -> None:
+    """Test that commas in env var values are escaped to prevent injection."""
+    env_file = tmp_path / ".env"
+    # 値にカンマが含まれると gcloud が別の env var として解釈するため要エスケープ
+    env_file.write_text("PROXY_SECRET=secret,INJECTED=bad\n")
+    env_before = {"MODE": "prod"}
+    env_after = {"MODE": "dev", "FORWARD_URL": "https://example.ngrok.io"}
+    with (
+        patch(
+            "src.cli.toggle_mode.get_current_mode",
+            side_effect=[env_before, env_after],
+        ),
+        patch("src.cli.toggle_mode.run_command") as mock_run,
+    ):
+        toggle_mode(
+            "dev",
+            _GCP,
+            forward_url="https://example.ngrok.io",
+            sync=True,
+            env_file=str(env_file),
+        )
+    call_args = mock_run.call_args[0][0]
+    update_arg = next(a for a in call_args if a.startswith("--update-env-vars="))
+    # カンマが \, にエスケープされ、独立した env var として解釈されないこと
+    assert "PROXY_SECRET=secret\\,INJECTED=bad" in update_arg
 
 
 # --- register_commands main() tests ---
