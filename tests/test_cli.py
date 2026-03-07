@@ -9,7 +9,7 @@ import pytest
 
 from src.cli.register_commands import main as register_commands_main
 from src.cli.register_commands import register_commands
-from src.cli.toggle_mode import get_current_mode, main, run_command, toggle_mode
+from src.cli.toggle_mode import get_current_mode, load_env_file, main, run_command, show_status, toggle_mode
 from src.core.exceptions import ConfigurationError
 
 # --- register_commands tests ---
@@ -243,6 +243,30 @@ def test_main_dev_mode(monkeypatch: pytest.MonkeyPatch) -> None:
         region="asia-northeast1",
         service_name="discord-gateway",
         forward_url="https://example.ngrok.io",
+        sync=False,
+        env_file=mock_toggle.call_args.kwargs["env_file"],
+    )
+
+
+def test_main_dev_mode_with_sync(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test main() in dev mode with --sync flag."""
+    monkeypatch.setenv("GCP_PROJECT_ID", "my-proj")
+    with (
+        patch(
+            "sys.argv",
+            ["toggle-mode", "dev", "--url", "https://example.ngrok.io", "--sync"],
+        ),
+        patch("src.cli.toggle_mode.toggle_mode") as mock_toggle,
+    ):
+        main()
+    mock_toggle.assert_called_once_with(
+        mode="dev",
+        project_id="my-proj",
+        region="asia-northeast1",
+        service_name="discord-gateway",
+        forward_url="https://example.ngrok.io",
+        sync=True,
+        env_file=mock_toggle.call_args.kwargs["env_file"],
     )
 
 
@@ -260,7 +284,101 @@ def test_main_prod_mode(monkeypatch: pytest.MonkeyPatch) -> None:
         region="asia-northeast1",
         service_name="discord-gateway",
         forward_url=None,
+        sync=False,
+        env_file=mock_toggle.call_args.kwargs["env_file"],
     )
+
+
+def test_main_status_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test main() in status mode."""
+    monkeypatch.setenv("GCP_PROJECT_ID", "my-proj")
+    monkeypatch.delenv("NGROK_DOMAIN", raising=False)
+    with (
+        patch("sys.argv", ["toggle-mode", "status"]),
+        patch("src.cli.toggle_mode.show_status") as mock_status,
+    ):
+        main()
+    mock_status.assert_called_once_with(
+        project_id="my-proj",
+        region="asia-northeast1",
+        service_name="discord-gateway",
+        ngrok_domain=None,
+        env_file=mock_status.call_args.kwargs["env_file"],
+    )
+
+
+def test_load_env_file_parses_correctly(tmp_path: pytest.TempPathFactory) -> None:
+    """Test that load_env_file correctly parses a .env file."""
+    env_file = tmp_path / ".env"
+    env_file.write_text("KEY1=value1\n# comment\nKEY2=value2\n\nKEY3=\n")
+    result = load_env_file(str(env_file))
+    assert result == {"KEY1": "value1", "KEY2": "value2", "KEY3": ""}
+
+
+def test_load_env_file_missing_returns_empty(tmp_path: pytest.TempPathFactory) -> None:
+    """Test that load_env_file returns empty dict for missing file."""
+    result = load_env_file(str(tmp_path / "nonexistent.env"))
+    assert result == {}
+
+
+def test_show_status_no_env_file(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test show_status when no .env file exists and no ngrok domain."""
+    cloud_env = {"MODE": "dev", "FORWARD_URL": "https://example.ngrok.io"}
+    with patch("src.cli.toggle_mode.get_current_mode", return_value=cloud_env):
+        show_status(
+            project_id="proj",
+            region="region",
+            service_name="svc",
+            ngrok_domain=None,
+            env_file="/nonexistent/.env",
+        )
+
+
+def test_show_status_with_env_file(tmp_path: pytest.TempPathFactory) -> None:
+    """Test show_status when .env file exists, comparing local vs Cloud Run vars."""
+    env_file = tmp_path / ".env"
+    env_file.write_text(
+        "DISCORD_PUBLIC_KEY=localkey\nPROXY_SECRET=secret\nN8N_HEALTH_URL=https://n8n.example.com/healthz\n"
+    )
+    cloud_env = {
+        "MODE": "dev",
+        "FORWARD_URL": "https://example.ngrok.io",
+        "DISCORD_PUBLIC_KEY": "cloudkey",
+        "PROXY_SECRET": "secret",
+    }
+    with patch("src.cli.toggle_mode.get_current_mode", return_value=cloud_env):
+        show_status(
+            project_id="proj",
+            region="region",
+            service_name="svc",
+            ngrok_domain="example.ngrok.io",
+            env_file=str(env_file),
+        )
+
+
+def test_toggle_mode_dev_with_sync(tmp_path: pytest.TempPathFactory) -> None:
+    """Test toggle_mode in dev mode with --sync syncs SYNC_ENV_VARS."""
+    env_file = tmp_path / ".env"
+    env_file.write_text("DISCORD_PUBLIC_KEY=mykey\nPROXY_SECRET=mysecret\n")
+    env_before = {"MODE": "prod"}
+    env_after = {"MODE": "dev", "FORWARD_URL": "https://example.ngrok.io"}
+    with (
+        patch("src.cli.toggle_mode.get_current_mode", side_effect=[env_before, env_after]),
+        patch("src.cli.toggle_mode.run_command") as mock_run,
+    ):
+        toggle_mode(
+            "dev",
+            "proj",
+            "region",
+            "svc",
+            forward_url="https://example.ngrok.io",
+            sync=True,
+            env_file=str(env_file),
+        )
+    call_args = mock_run.call_args[0][0]
+    update_arg = next(a for a in call_args if a.startswith("--update-env-vars="))
+    assert "DISCORD_PUBLIC_KEY=mykey" in update_arg
+    assert "PROXY_SECRET=mysecret" in update_arg
 
 
 # --- register_commands main() tests ---

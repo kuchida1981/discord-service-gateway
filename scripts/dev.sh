@@ -30,6 +30,7 @@ Commands:
   down    Stop local development environment and switch Cloud Run to prod mode
   restart Restart local environment (down + up)
   logs    Show docker compose logs
+  status  Show current development environment and sync status
 
 Options:
   --skip-cloud-run    Skip Cloud Run mode toggling (local-only mode)
@@ -53,6 +54,46 @@ EOF
     exit 1
 }
 
+# .env と .env.example のキー比較バリデーション
+validate_env_file() {
+    local env_file="$PROJECT_ROOT/.env"
+    local example_file="$PROJECT_ROOT/.env.example"
+
+    if [[ ! -f "$example_file" ]]; then
+        return 0
+    fi
+
+    if [[ ! -f "$env_file" ]]; then
+        warn ".env file not found. Copy .env.example to get started."
+        return 0
+    fi
+
+    local missing=()
+    while IFS= read -r line; do
+        [[ -z "$line" || "$line" =~ ^# ]] && continue
+        local key="${line%%=*}"
+        if [[ -n "$key" ]] && ! grep -q "^${key}=" "$env_file"; then
+            missing+=("$key")
+        fi
+    done < "$example_file"
+
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        warn "Missing environment variables in .env (defined in .env.example):"
+        for var in "${missing[@]}"; do
+            warn "  - $var"
+        done
+    fi
+}
+
+# .env の MD5 ハッシュを ENV_HASH としてエクスポート
+compute_env_hash() {
+    if [[ -f "$PROJECT_ROOT/.env" ]]; then
+        export ENV_HASH
+        ENV_HASH=$(md5sum "$PROJECT_ROOT/.env" | cut -d' ' -f1)
+        info "ENV_HASH: $ENV_HASH"
+    fi
+}
+
 # Cloud Run モード切替
 toggle_cloud_run() {
     local mode=$1
@@ -73,6 +114,7 @@ toggle_cloud_run() {
 
     local cmd=("uv" "run" "toggle-mode" "$mode")
     [[ -n "$forward_url" ]] && cmd+=("--url" "$forward_url")
+    [[ "$mode" == "dev" ]] && cmd+=("--sync")
 
     if "${cmd[@]}"; then
         success "Cloud Run mode switched to $mode"
@@ -94,11 +136,17 @@ get_ngrok_url() {
 cmd_up() {
     info "Starting local development environment..."
 
+    # .env バリデーション
+    validate_env_file
+
+    # .env の変更を Docker コンテナに反映するためハッシュを算出
+    compute_env_hash
+
     # docker compose up
     cd "$PROJECT_ROOT"
     docker compose up -d
 
-    # Cloud Run を dev モードに切替
+    # Cloud Run を dev モードに切替（環境変数を同期）
     local ngrok_url
     ngrok_url=$(get_ngrok_url)
     toggle_cloud_run "dev" "$ngrok_url"
@@ -135,6 +183,14 @@ cmd_restart() {
 cmd_logs() {
     cd "$PROJECT_ROOT"
     docker compose logs "${@:2}"
+}
+
+cmd_status() {
+    if [[ -z "${GCP_PROJECT_ID:-}" ]]; then
+        warn "GCP_PROJECT_ID not set - cannot show Cloud Run status"
+        return 0
+    fi
+    uv run toggle-mode status
 }
 
 # メイン処理
@@ -174,6 +230,9 @@ main() {
             ;;
         logs)
             cmd_logs "$@"
+            ;;
+        status)
+            cmd_status "$@"
             ;;
         -h|--help)
             usage
