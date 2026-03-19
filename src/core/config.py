@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     NGROK_DOMAIN: str | None = None
 
     N8N_HEALTH_URL: str
+    N8N_TASKS_LIST_URL: str
 
     # Cloud Run Proxy Settings
     MODE: str = "prod"  # prod, dev, local

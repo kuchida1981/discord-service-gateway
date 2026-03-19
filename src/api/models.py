@@ -29,6 +29,21 @@ class N8nGroup(BaseModel):
     options: Annotated[list[HealthOption], Field(min_length=1)]
 
 
+class ListOption(BaseModel):
+    """Option for the list subcommand."""
+
+    name: Literal["list"]
+    type: int
+
+
+class TasksGroup(BaseModel):
+    """Option group for tasks commands."""
+
+    name: Literal["tasks"]
+    type: int
+    options: Annotated[list[ListOption], Field(min_length=1)]
+
+
 class PingCommandData(BaseModel):
     """Data for the /ping command."""
 
@@ -37,13 +52,16 @@ class PingCommandData(BaseModel):
     type: int
 
 
+DsgCommandOption = Annotated[N8nGroup | TasksGroup, Field(discriminator="name")]
+
+
 class DsgCommandData(BaseModel):
     """Data for the /dsg command."""
 
     name: Literal["dsg"]
     id: str
     type: int
-    options: Annotated[list[N8nGroup], Field(min_length=1)]
+    options: Annotated[list[DsgCommandOption], Field(min_length=1)]
 
 
 CommandData = Annotated[
